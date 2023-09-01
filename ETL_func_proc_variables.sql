@@ -5,6 +5,7 @@
 -- If a non-existing position is inserted, then show an error with the desired text. 
 -- If the transferred salary is less than 30000, then show an error with the desired text.
 
+
 DELIMITER $$
 
 CREATE PROCEDURE emp_add (in p_birth_date date,
