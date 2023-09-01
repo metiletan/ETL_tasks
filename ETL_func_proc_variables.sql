@@ -1,5 +1,9 @@
 -- ETL Exercises 1
--- 1. Создать процедуру добавления нового сотрудника, с нужным перечнем входящий параметров. После успешной работы процедуры данные должны попасть в таблицы employees, dept_emp, salaries и titles; Вычисление emp_no, вычисляем по формуле max(emp_no)+1. Если передана не существующая должность, тогда показать ошибку с нужным текстом. Если передана зарплата меньше 30000, тогда показать ошибку с нужным текстом.
+-- 1. Create a procedure for adding a new employee, with the required list of input parameters. 
+-- After the procedure has successfully run, the data should end up in the employees, dept_emp, salaries, and titles tables; 
+-- Calculation of emp_no, calculated by the formula max(emp_no)+1. 
+-- If a non-existing position is inserted, then show an error with the desired text. 
+-- If the transferred salary is less than 30000, then show an error with the desired text.
 
 DELIMITER $$
 
@@ -19,17 +23,17 @@ CREATE PROCEDURE emp_add (in p_birth_date date,
 						in t_to_date date)                            
 
 BEGIN
- -- Если передана не существующая должность, тогда показать ошибку с нужным текстом. 
+-- If a non-existing position is inserted, then show an error with the desired text. 
 SET @err = (select count(title) from titles WHERE title = t_title);
 IF @err = 0 THEN
 SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Передана не существующая должность';
+SET MESSAGE_TEXT = 'This position does not exist';
 END IF;
 
--- Если передана зарплата меньше 30000, тогда показать ошибку с нужным текстом.    
+-- If the transferred salary is less than 30000, then show an error with the desired text. 
 IF s_salary < 30000 THEN
 SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Зарплата менее 30000';
+SET MESSAGE_TEXT = 'Salary is less than 30000';
 END IF;
 				-- employees
                 SET @emp_no = (SELECT MAX(emp_no) FROM employees.employees) + 1;
@@ -63,7 +67,9 @@ CALL emp_add ('1989-07-15', 'Anna', 'Deryaz', 'F', curdate(), 'd005', curdate(),
 
 SELECT  @err;
 
--- 2. Создать процедуру для обновления зарплаты по сотруднику. При обновлении зарплаты, нужно закрыть последнюю активную запись текущей датой, и создавать новую историческую запись текущей датой. Если передан ну существующий сотрудник, тогда показать ошибку с нужным текстом.
+-- 2. Create a procedure to update the salary for an employee. When updating the salary, you need to close the last active record with the current date, 
+-- and create a new historical record with the current date. 
+-- If non-existing employee is inserted, then show an error with the desired text.
 
 DELIMITER $$
 
@@ -74,7 +80,7 @@ BEGIN
 SET @er = (select count(emp_no) from salaries WHERE emp_no = s_emp_no);
 IF @er = 0 THEN
 SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Передан не существующий сотрудник';
+SET MESSAGE_TEXT = 'This employee does not exist';
 END IF;
 
 				UPDATE employees.salaries 
@@ -93,7 +99,8 @@ DELIMITER ;
 CALL sal_update (10050, 60000);
 CALL sal_update (101, 60000); -- error
 
--- 3. Создать процедуру для увольнения сотрудника, закрытия исторических записей в таблицах dept_emp, salaries и titles. Если передан несуществующий номер сотрудника, тогда показать ошибку с нужным текстом.
+-- 3. Create a procedure to fire an employee, closing historical records in the dept_emp, salaries and titles tables. 
+--- If a non-existent employee number is inserted, then show an error with the required text.
 
 DELIMITER $$
 
@@ -103,7 +110,7 @@ BEGIN
 SET @e = (select count(emp_no) from salaries WHERE emp_no = f_emp_no);
 IF @e = 0 THEN
 SIGNAL SQLSTATE '45000'
-SET MESSAGE_TEXT = 'Передан не существующий сотрудник';
+SET MESSAGE_TEXT = 'This employee does not exist';
 END IF;
 				-- dept_emp
                 UPDATE employees.dept_emp 
@@ -130,7 +137,7 @@ DELIMITER ;
 CALL emp_fired (10001);
 CALL emp_fired (1001); -- error
 
--- 4. Создать функцию, которая выводила бы текущую зарплату по сотруднику.
+-- 4. Create a function that would display the current salary for an employee.
 
 DELIMITER $$
 CREATE FUNCTION get_emp_sal (s_emp_no INTEGER) RETURNS INTEGER
